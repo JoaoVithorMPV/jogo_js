@@ -30,6 +30,25 @@ const line = {
   },
 };
 
+const score = {
+  human: 0,
+  computer: 0,
+  increaseHuman: function () {
+    this.human++;
+  },
+  increaseComputer: function () {
+    this.computer++;
+  },
+  draw: function () {
+    canvasCtx.font = "bold 72px Arial";
+    canvasCtx.textAlign = "center";
+    canvasCtx.textBaseline = "top";
+    canvasCtx.fillStyle = "#01341D";
+    canvasCtx.fillText(this.human, field.w / 4, 50);
+    canvasCtx.fillText(this.computer, field.w / 2 + field.w / 4, 50);
+  },
+};
+
 const leftPaddle = {
   //Desenho da raquete esquerda
   x: gapX,
@@ -68,7 +87,7 @@ const ball = {
   x: field.w / 2,
   y: field.h / 2,
   r: 20,
-  speed: 2,
+  speed: 5,
   directionX: 1,
   directionY: 1,
   _calcPosition: function () {
@@ -83,6 +102,8 @@ const ball = {
         this._reverseX();
       } else {
         // faz o ponto
+        score.increaseHuman();
+        this._pointUp();
       }
     }
     //calcula a posição vertical da bola (eixo Y)
@@ -92,12 +113,34 @@ const ball = {
     ) {
       this._reverseY();
     }
+
+    //verifica se o jogador 2 (computador) fez o ponto
+    if (this.x < this.r + leftPaddle.w + gapX) {
+      //calcula a posição da raquete no eixo y
+      if (
+        this.y + this.r > leftPaddle.y &&
+        this.y - this.r < leftPaddle.y + leftPaddle.h
+      ) {
+        // reabate a bola
+        this._reverseX();
+      } else {
+        //faz o ponto
+        score.increaseComputer();
+        this._pointUp();
+      }
+    }
   },
   _reverseX: function () {
-    this.directionY *= -1;
+    this.directionX *= -1;
   },
   _reverseY: function () {
     this.directionY *= -1;
+  },
+  _pointUp: function () {
+    this.x = field.w / 2;
+    this.h = field.h / 2;
+
+    this._reverseX();
   },
   _move: function () {
     this.x += this.directionX * this.speed;
@@ -117,6 +160,7 @@ const ball = {
 function draw() {
   field.draw();
   line.draw();
+  score.draw();
   leftPaddle.draw();
   rightPaddle.draw();
   ball.draw();
